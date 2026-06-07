@@ -1,4 +1,4 @@
-## Interface: 50500
+## Interface: 50504
 ## Title: Quick Talents Classic
 ## SavedVariables: QT_Saved
 QuickTalentsClassic.lua

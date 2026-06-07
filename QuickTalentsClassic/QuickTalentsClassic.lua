@@ -301,6 +301,9 @@ QTC:SetScript("OnEvent", function(self)
 			if not buttons[i] then
 				local btn = CreateFrame("BUTTON", "QuickTalentsButton" .. i, self, "SecureActionButtonTemplate")
 				btn:SetAttribute("type1", "macro")
+				-- Patch 5.5.4: secure buttons act on key-down (ActionButtonUseKeyDown);
+				-- the default LeftButtonUp registration no longer triggers the action
+				btn:RegisterForClicks("AnyDown", "AnyUp")
 				btn:SetSize(26, 26)
 
 				SetButtonPosition(btn, i)
@@ -362,7 +365,7 @@ QTC:SetScript("OnEvent", function(self)
 					end)
 				else -- glyph history
 					btn:SetAlpha(0.25)
-					btn:RegisterForClicks("RightButtonUp", "LeftButtonDown")
+					btn:RegisterForClicks("AnyDown", "AnyUp")
 					-- TODO: remove from history
 					btn:SetAttribute("type2", "script") -- TODO: maybe use a modified click instead
 					btn:SetAttribute("_script", function(btn) -- remove from history
@@ -659,7 +662,7 @@ QTC:SetScript("OnEvent", function(self)
 	}
 	CreateFrame("Frame", "QuickTalentsBinder", self)
 	function QuickTalentsBinder:OnEvent(e, arg1)
-		if e == "LEARNED_SPELL_IN_TAB" then
+		if e == "LEARNED_SPELL_IN_SKILL_LINE" or e == "LEARNED_SPELL_IN_TAB" then
 			if cfg.Bindings[arg1] then
 				PickupSpell(arg1)
 				PlaceAction(cfg.Bindings[arg1])
@@ -674,6 +677,9 @@ QTC:SetScript("OnEvent", function(self)
 		end
 	end
 	QuickTalentsBinder:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
-	QuickTalentsBinder:RegisterEvent("LEARNED_SPELL_IN_TAB")
+	-- Patch 5.5.4 replaced LEARNED_SPELL_IN_TAB with LEARNED_SPELL_IN_SKILL_LINE (same payload)
+	if not pcall(QuickTalentsBinder.RegisterEvent, QuickTalentsBinder, "LEARNED_SPELL_IN_SKILL_LINE") then
+		QuickTalentsBinder:RegisterEvent("LEARNED_SPELL_IN_TAB")
+	end
 	QuickTalentsBinder:SetScript("OnEvent", QuickTalentsBinder.OnEvent)
 end)
