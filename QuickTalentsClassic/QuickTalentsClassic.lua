@@ -351,7 +351,15 @@ QTC:SetScript("OnEvent", function(self)
 				elseif i <= 21 then -- glyphs slots
 					btn:SetAttribute(
 						"macrotext",
-						format("/click GlyphFrameGlyph%d\n/click StaticPopup1Button1\n", (i - 18) * 2)
+						-- Patch 5.5.4: protected /click only fires on a shown frame, so open
+						-- the glyph tab first (mirrors the talent/history macros) before
+						-- clicking the socket to clear it.
+						"/stopmacro [combat]\n"
+							.. "/run C()S()\n"
+							.. "/click [spec:1]PlayerSpecTab1;[spec:2]PlayerSpecTab2\n"
+							.. "/click PlayerTalentFrameTab3\n"
+							.. format("/click GlyphFrameGlyph%d\n", (i - 18) * 2)
+							.. "/click StaticPopup1Button1\n"
 					)
 					btn.ring = btn:CreateTexture(nil, "ARTWORK")
 					btn.ring:SetTexture("Interface/TalentFrame/talent-main")
